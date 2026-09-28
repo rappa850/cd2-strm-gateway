@@ -54,7 +54,9 @@ CD2 STRM Gateway
 - Vue 3
 - Vite
 - TypeScript
-- Element Plus
+- UnoCSS
+- Lucide Vue
+- Lightweight in-house base components; no full UI component library
 
 ### Deployment
 
@@ -99,6 +101,7 @@ This project will not implement:
 - Poster/artwork management
 - Emby/Jellyfin/Plex plugins
 - Media renaming or organization
+- Full UI component libraries such as Element Plus
 
 ## STRM Example
 
