@@ -1,20 +1,22 @@
 # CD2 STRM Gateway
 
-A lightweight self-hosted STRM generator and direct-link redirect gateway for CloudDrive2.
+[中文](README.md) | [English](README.en.md)
 
-## Goal
+一个基于 CloudDrive2 官方 gRPC API 的轻量级自托管 STRM 生成与直链重定向服务。
 
-Use the official CloudDrive2 gRPC API to:
+## 项目目标
 
-1. Browse and scan media files from configured CloudDrive2 directories.
-2. Generate local `.strm` files while preserving the source directory structure.
-3. Resolve playback requests through `GetDownloadUrlPath(get_direct_url=true)`.
-4. Return an HTTP 302 redirect to the cloud provider's direct URL.
-5. Keep media traffic off the gateway itself.
+通过 CloudDrive2 官方 gRPC API：
 
-The service does **not** proxy, transcode, scrape metadata, call 115 private APIs, or require 115 cookies.
+1. 浏览并扫描指定 CloudDrive2 目录中的媒体文件。
+2. 保持原始目录结构生成本地 `.strm` 文件。
+3. 播放时通过 `GetDownloadUrlPath(get_direct_url=true)` 动态获取云盘直链。
+4. 使用 HTTP 302 将播放器重定向到真实云盘/CDN 地址。
+5. 媒体数据不经过本服务中转。
 
-## Architecture
+本项目**不代理媒体流量、不转码、不刮削元数据、不调用 115 私有 API，也不需要 115 Cookie**。
+
+## 架构
 
 ```text
 CloudDrive2
@@ -23,9 +25,9 @@ CloudDrive2
     ▼
 CD2 STRM Gateway
     ├── Web UI
-    ├── STRM task manager
-    ├── SQLite mappings
-    ├── Scanner / watcher
+    ├── STRM 任务管理
+    ├── SQLite 映射
+    ├── 扫描 / 监听
     └── GET /r/{mapping_id}
               │
               │ GetDownloadUrlPath(get_direct_url=true)
@@ -33,113 +35,113 @@ CD2 STRM Gateway
          HTTP 302 Redirect
               │
               ▼
-       Cloud provider / CDN
+          云盘 / CDN
 ```
 
-## Technology Stack
+## 技术栈
 
-### Backend
+### 后端
 
 - Go 1.24+
 - CloudDrive2 gRPC API
 - SQLite
-- Standard `net/http` or a lightweight HTTP framework
-- Server-side session authentication
-- AES-GCM for sensitive local configuration
+- 标准 `net/http` 或轻量 HTTP 框架
+- 服务端 Session 认证
+- AES-GCM 加密敏感本地配置
 
-### Frontend
+### 前端
 
 - Vue 3
 - Vite
 - TypeScript
 - Element Plus
 
-### Deployment
+### 部署
 
 - Docker
 - Docker Compose
-- Single-container runtime
-- Frontend compiled to static assets and served by the Go backend
-- Persistent data under `/data`
+- 单容器运行
+- 前端编译为静态资源，由 Go 后端统一托管
+- 持久化数据统一存放于 `/data`
 
-## Authentication Model
+## 登录与认证
 
-The Web UI uses an application-owned **Admin Token**.
+Web 管理页面使用本服务自有的 **Admin Token**，与 CloudDrive2 API Token 完全分离。
 
-On first startup the service generates a cryptographically secure Admin Token and prints it once to the application log. The browser exchanges this token for an HttpOnly session cookie.
+首次启动时，服务会生成一个高强度 Admin Token，并仅在应用日志中输出一次。浏览器使用该 Token 登录成功后，换取 HttpOnly Session Cookie。
 
-The CloudDrive2 address and API Token are configured only after login and are never used as Web login credentials.
+CloudDrive2 地址与 API Token 仅作为登录后的系统配置，不作为 Web 登录凭证。
 
-## Core Responsibilities
+## 核心能力
 
-- Application Admin Token and session login
-- CloudDrive2 connection and API Token validation
-- CloudDrive2 directory browser
-- Multiple STRM generation jobs
-- Full scan and incremental synchronization
-- Stable internal mapping IDs
-- STRM lifecycle management
-- Direct URL resolution
-- HTTP 302 playback redirect
-- Direct URL caching based on `expiresIn`
-- Web dashboard and operational logs
+- Admin Token 与 Session 登录
+- CloudDrive2 连接和 API Token 校验
+- CloudDrive2 目录浏览
+- 多个 STRM 生成任务
+- 全量扫描与增量同步
+- 稳定的内部 Mapping ID
+- STRM 生命周期管理
+- Direct URL 动态解析
+- HTTP 302 播放重定向
+- 基于 `expiresIn` 的直链缓存
+- Web Dashboard 与运行日志
 
-## Non-Goals
+## 不做什么
 
-This project will not implement:
+本项目不会实现：
 
-- 115 Cookie authentication
-- 115 private APIs
-- Media proxying
-- Media transcoding
-- NFO scraping
-- TMDB integration
-- Poster/artwork management
-- Emby/Jellyfin/Plex plugins
-- Media renaming or organization
+- 115 Cookie 认证
+- 115 私有 API
+- 媒体代理
+- 媒体转码
+- NFO 刮削
+- TMDB 集成
+- 海报 / 图片管理
+- Emby / Jellyfin / Plex 插件
+- 媒体重命名或整理
 
-## STRM Example
+## STRM 示例
 
-Source:
+CloudDrive2 源文件：
 
 ```text
 /115/Media/Movies/Dune Part Two (2024)/Dune Part Two (2024).mkv
 ```
 
-Generated file:
+生成：
 
 ```text
 /strm/Movies/Dune Part Two (2024)/Dune Part Two (2024).strm
 ```
 
-Content:
+STRM 内容：
 
 ```text
 https://strm.example.com/r/01KABCDEFG123456789
 ```
 
-Playback flow:
+播放流程：
 
 ```text
-Player
+播放器
   -> GET /r/{mapping_id}
-  -> Gateway resolves CloudDrive2 source path
+  -> Gateway 查询 CloudDrive2 源路径
   -> CloudDrive2 GetDownloadUrlPath(get_direct_url=true)
-  -> Gateway returns HTTP 302
-  -> Player connects directly to the cloud/CDN URL
+  -> Gateway 返回 HTTP 302
+  -> 播放器直接连接云盘 / CDN
 ```
 
 ## CloudDrive2 API
 
-Official documentation:
+官方文档：
 
 https://www.clouddrive2.com/api/CloudDrive2_gRPC_API_Guide.html
 
-Implementation must follow the official API documentation instead of guessing undocumented behavior.
+实现必须以 CloudDrive2 官方 API 文档为准，不猜测未公开行为。
 
-## Status
+## 当前状态
 
-Initial architecture and implementation constraints are defined. Core implementation is pending.
+项目架构、技术栈与实现约束已确定，核心功能正在开发中。
 
 ## License
 
