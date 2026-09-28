@@ -1,0 +1,12 @@
+services:
+  gateway:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - gateway_data:/data
+      - gateway_strm:/strm
+volumes:
+  gateway_data:
+  gateway_strm:

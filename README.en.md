@@ -142,9 +142,18 @@ https://www.clouddrive2.com/api/CloudDrive2_gRPC_API_Guide.html
 
 Implementation must follow the official CloudDrive2 API documentation rather than guessing undocumented behavior.
 
-## Status
+## Run
 
-Project architecture, technology stack, and implementation constraints are defined. Core implementation is in progress.
+```bash
+docker compose up --build -d
+docker compose logs gateway
+```
+
+The initial Admin Token appears once in the startup logs. Open `http://localhost:8080`, sign in, configure the CloudDrive2 gRPC origin and API Token, then create a job. The Compose file persists application data in `gateway_data` and generated STRM files in `gateway_strm`; use a job output directory such as `/strm/media`.
+
+The CloudDrive2 token needs `allow_list` and `allow_read`, ideally scoped to the media directory. The gateway returns 502 if CloudDrive2 supplies no direct URL or requires extra HTTP headers that a plain redirect cannot provide. Media is never proxied.
+
+Manual full scans are available. Scheduled scans and push based incremental updates remain phase 5 work. Deleting a job removes its mapped STRM files without recursively deleting the output directory.
 
 ## License
 

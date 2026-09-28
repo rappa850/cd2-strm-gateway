@@ -142,9 +142,28 @@ https://www.clouddrive2.com/api/CloudDrive2_gRPC_API_Guide.html
 
 实现必须以 CloudDrive2 官方 API 文档为准，不猜测未公开行为。
 
-## 当前状态
+## 运行
 
-项目架构、技术栈与实现约束已确定，核心功能正在开发中。
+```bash
+docker compose up --build -d
+docker compose logs gateway
+```
+
+首次启动日志只输出一次 Admin Token。打开 `http://localhost:8080` 登录，填写 CloudDrive2 gRPC 地址（如 `http://clouddrive2:19798`）与 API Token，验证成功后创建任务。Compose 将应用数据保存到 `gateway_data` 卷，将 STRM 输出保存到 `gateway_strm` 卷；任务输出目录填写 `/strm/任务名`。播放器需要能访问任务中填写的“网关公开地址”。
+
+CloudDrive2 API Token 需要文件列表与读取权限（`allow_list`、`allow_read`），并应限制在所需源目录。直链获取遵循官方 proto 的 `get_direct_url=true`；若云盘未返回 `directUrl`，或要求额外的 User-Agent / HTTP 请求头，网关返回 502，不会改为代理媒体流量。
+
+当前支持手动全量扫描。定时扫描和推送增量同步属于后续阶段。任务删除会删除该任务映射的 STRM 文件，输出目录不会递归删除。修改源目录、输出目录或网关公开地址时，请新建任务。
+
+本地开发：
+
+```bash
+cd web && npm ci && npm run build
+cd .. && go test ./... && go vet ./...
+DATA_DIR=./data WEB_DIST=./web/dist go run ./cmd/server
+```
+
+Windows PowerShell 中可用 `$env:DATA_DIR="./data"; $env:WEB_DIST="./web/dist"; go run ./cmd/server` 启动。
 
 ## License
 
