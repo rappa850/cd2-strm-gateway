@@ -54,7 +54,9 @@ CD2 STRM Gateway
 - Vue 3
 - Vite
 - TypeScript
-- Element Plus
+- UnoCSS
+- Lucide Vue
+- 自建轻量基础组件，不引入完整 UI 组件库
 
 ### 部署
 
@@ -99,6 +101,7 @@ CloudDrive2 地址与 API Token 仅作为登录后的系统配置，不作为 We
 - 海报 / 图片管理
 - Emby / Jellyfin / Plex 插件
 - 媒体重命名或整理
+- 引入 Element Plus 等完整 UI 组件库
 
 ## STRM 示例
 
