@@ -18,7 +18,12 @@ CD2 STRM Gateway is a small self-hosted service that generates STRM files from C
 - Vue 3
 - Vite
 - TypeScript
-- Element Plus
+- UnoCSS
+- Lucide Vue
+- Build lightweight project-local base components
+- Do not add Element Plus or any other full UI component library
+
+The frontend is intentionally small. Prefer simple local components for buttons, inputs, selects, switches, modals, cards, tables, badges, alerts, form fields, tabs, and the directory picker. Avoid heavy UI frameworks and unnecessary client-side dependencies.
 
 ### Deployment
 - Docker
@@ -116,6 +121,7 @@ Do not implement:
 - poster/artwork management
 - Emby/Jellyfin/Plex plugins
 - media renaming/organization
+- Element Plus or another full UI component library
 
 ## Storage
 
